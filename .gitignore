@@ -47,3 +47,4 @@ Temporary Items
 .apdisk
 code/.ipynb_checkpoints/
 code/.ipynb_checkpoints/Rover_Project_Test_Notebook-checkpoint.ipynb
+*.pyc
