@@ -23,6 +23,7 @@ def coast(Rover):
 
 def spin(Rover):
     Rover.throttle = 0
+    if Rover.vel >= 0.2:
         Rover.brake = Rover.brake_set
     else:
         Rover.brake = 0
