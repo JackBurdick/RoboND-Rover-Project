@@ -16,6 +16,9 @@ def decelerate(Rover):
     Rover.brake = Rover.brake_set
     Rover.steer = 0
 
+def spin(Rover):
+    Rover.throttle = 0
+    Rover.brake = 0
 
 def determine_nav_angle(Rover, bias=0):
     degree_buckets = np.round(Rover.nav_angles * 180 / (6 * np.pi)) * 6
@@ -44,7 +47,9 @@ def determine_nav_angle(Rover, bias=0):
 def determine_target_angle(Rover):
 
     degree_buckets = np.round(Rover.tar_angles * 180 / (6 * np.pi)) * 6
-    angle_options = collections.Counter(degree_buckets)
+    forward_angles = degree_buckets[degree_buckets <= 15.0]
+    forward_angles = forward_angles[forward_angles  >= -15]
+    angle_options = collections.Counter(forward_angles)
     selected_angle = angle_options.most_common(1)[0][0]
     return selected_angle
 
@@ -65,7 +70,10 @@ def decision_step(Rover):
                 decelerate(Rover)
                 if Rover.vel <= 0.5:
                     # turn right
-                    Rover.steer = -15
+                    if Rover.steer is 15 or -15:
+                        spin(Rover)
+                    else:
+                        accelerate(Rover)
                     print("no nav, slow, turning right = -15")
                 else:
                     print("no nav, moving, new nav = -10")
@@ -83,18 +91,29 @@ def decision_step(Rover):
     # in target_ret mode, the rover is getting a target
     elif Rover.mode == 'target_ret':
         print("target_ret ", end="")
-        if Rover.tar_angles is None:
-            print("in target mode, but no targets")
-        Rover.steer = determine_target_angle(Rover)
+        
+        if len(Rover.tar_angles) <= 20:
+            print("in target mode, but not enough targets, back to explore")
+            Rover.mode = 'explore'
+        
+        elif len(Rover.tar_angles) > 20:
+            Rover.steer = determine_target_angle(Rover)
+            print("moving toward target")
+            if Rover.steer is 15 or -15:
+                spin(Rover)
+            else:
+                accelerate(Rover)
+        
+        # check if near sample and collect
         if Rover.near_sample > 0:
             print("near target, slowing down")
             decelerate(Rover)
             if Rover.vel < 0.2:
                 Rover.pick_up = True
-                Rover.mode = 'target_ret'
-        else:
-            print("moving toward target")
-            accelerate(Rover)
+                Rover.mode = 'explore'
+        # else:
+        #     print("moving toward target")
+        #     accelerate(Rover)
 
 
     # Here we can expand on states, for now we'll send the rover back to the
