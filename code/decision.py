@@ -11,7 +11,6 @@ def accelerate(Rover):
         # coast
         Rover.throttle = 0
 
-
 def decelerate(Rover):
     Rover.throttle = 0
     Rover.brake = Rover.brake_set
@@ -22,8 +21,10 @@ def determine_nav_angle(Rover, bias=0):
     degree_buckets = np.round(Rover.nav_angles * 180 / (6 * np.pi)) * 6
 
     # Filter for only forward angles: [-15 - 15], select most common
-    forward_angles = degree_buckets[degree_buckets <= 15.0 and degree_buckets  >= -15]
+    forward_angles = degree_buckets[degree_buckets <= 15.0]
+    forward_angles = forward_angles[forward_angles  >= -15]
     angle_options = collections.Counter(forward_angles)
+    print(angle_options.most_common(1))
     selected_angle = angle_options.most_common(1)[0][0]
     
     # adjust steer angle for velocity
@@ -41,11 +42,11 @@ def determine_nav_angle(Rover, bias=0):
 
 
 def determine_target_angle(Rover):
+
     degree_buckets = np.round(Rover.tar_angles * 180 / (6 * np.pi)) * 6
     angle_options = collections.Counter(degree_buckets)
     selected_angle = angle_options.most_common(1)[0][0]
-    # steer_angle = np.clip(np.mean(Rover.tar_angles * 180/np.pi), -15, 15)
-    return steer_angle
+    return selected_angle
 
 
 # build a decision tree for determining throttle, brake and steer 
@@ -53,13 +54,47 @@ def determine_target_angle(Rover):
 def decision_step(Rover):
     # in explore mode, the rover is exploring the map
     if Rover.mode == 'explore':
+        print("explore ", end="")
         # first check if we have nav, terrain
-
-        # if we can see a target, go into target mode
+        # 5 is a magic number
+        if len(Rover.nav_angles) > 5:
+            if len(Rover.tar_angles) > 5:
+                print("target angles: ", Rover.tar_angles)
+                Rover.mode = 'target_ret'
+            elif len(Rover.nav_angles) < Rover.stop_forward:
+                decelerate(Rover)
+                if Rover.vel <= 0.5:
+                    # turn right
+                    Rover.steer = -15
+                    print("no nav, slow, turning right = -15")
+                else:
+                    print("no nav, moving, new nav = -10")
+                    Rover.steer = -10
+                   # Rover.steer = determine_nav_angle(Rover)
+            else:
+                # nav the terrain
+                print("naving the terrain")
+                # 1 is bias to slightly favor left wall
+                Rover.steer = determine_nav_angle(Rover, 1)
+                accelerate(Rover)
+            # if we can see a target, go into target mode
 
 
     # in target_ret mode, the rover is getting a target
     elif Rover.mode == 'target_ret':
+        print("target_ret ", end="")
+        if Rover.tar_angles is None:
+            print("in target mode, but no targets")
+        Rover.steer = determine_target_angle(Rover)
+        if Rover.near_sample > 0:
+            print("near target, slowing down")
+            decelerate(Rover)
+            if Rover.vel < 0.2:
+                Rover.pick_up = True
+                Rover.mode = 'target_ret'
+        else:
+            print("moving toward target")
+            accelerate(Rover)
 
 
     # Here we can expand on states, for now we'll send the rover back to the
