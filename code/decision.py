@@ -23,7 +23,6 @@ def coast(Rover):
 
 def spin(Rover):
     Rover.throttle = 0
-    if Rover.vel >= 0:
         Rover.brake = Rover.brake_set
     else:
         Rover.brake = 0
@@ -77,7 +76,7 @@ def decision_step(Rover):
                 decelerate(Rover)
                 if Rover.vel <= 0.5:
                     # turn right
-                    if Rover.steer is 15 or -15:
+                    if Rover.steer >= 10 or Rover.steer <= -10:
                         spin(Rover)
                     else:
                         accelerate(Rover)
@@ -108,11 +107,11 @@ def decision_step(Rover):
                 Rover.pick_up = True
                 Rover.mode = 'explore'
         
-        if len(Rover.tar_angles) <= 15:
+        if len(Rover.tar_angles) <= 8:
             print("in target mode, but not enough targets, back to explore")
             Rover.mode = 'explore'
         
-        elif len(Rover.tar_angles) > 15:
+        elif len(Rover.tar_angles) > 8:
             print("can move toward target")
             Rover.steer = determine_target_angle(Rover)
             
