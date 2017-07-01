@@ -16,9 +16,17 @@ def decelerate(Rover):
     Rover.brake = Rover.brake_set
     Rover.steer = 0
 
-def spin(Rover):
+def coast(Rover):
+    Rover.throttle = 0
     Rover.throttle = 0
     Rover.brake = 0
+
+def spin(Rover):
+    Rover.throttle = 0
+    if Rover.vel >= 0:
+        Rover.brake = Rover.brake_set
+    else:
+        Rover.brake = 0
 
 def determine_nav_angle(Rover, bias=0):
     degree_buckets = np.round(Rover.nav_angles * 180 / (6 * np.pi)) * 6
@@ -47,9 +55,8 @@ def determine_nav_angle(Rover, bias=0):
 def determine_target_angle(Rover):
 
     degree_buckets = np.round(Rover.tar_angles * 180 / (6 * np.pi)) * 6
-    forward_angles = degree_buckets[degree_buckets <= 15.0]
-    forward_angles = forward_angles[forward_angles  >= -15]
-    angle_options = collections.Counter(forward_angles)
+
+    angle_options = collections.Counter(degree_buckets)
     selected_angle = angle_options.most_common(1)[0][0]
     return selected_angle
 
@@ -83,7 +90,7 @@ def decision_step(Rover):
                 # nav the terrain
                 print("naving the terrain")
                 # 1 is bias to slightly favor left wall
-                Rover.steer = determine_nav_angle(Rover, 1)
+                Rover.steer = determine_nav_angle(Rover, 0.5)
                 accelerate(Rover)
             # if we can see a target, go into target mode
 
@@ -91,18 +98,7 @@ def decision_step(Rover):
     # in target_ret mode, the rover is getting a target
     elif Rover.mode == 'target_ret':
         print("target_ret ", end="")
-        
-        if len(Rover.tar_angles) <= 20:
-            print("in target mode, but not enough targets, back to explore")
-            Rover.mode = 'explore'
-        
-        elif len(Rover.tar_angles) > 20:
-            Rover.steer = determine_target_angle(Rover)
-            print("moving toward target")
-            if Rover.steer is 15 or -15:
-                spin(Rover)
-            else:
-                accelerate(Rover)
+        coast(Rover)
         
         # check if near sample and collect
         if Rover.near_sample > 0:
@@ -111,6 +107,21 @@ def decision_step(Rover):
             if Rover.vel < 0.2:
                 Rover.pick_up = True
                 Rover.mode = 'explore'
+        
+        if len(Rover.tar_angles) <= 15:
+            print("in target mode, but not enough targets, back to explore")
+            Rover.mode = 'explore'
+        
+        elif len(Rover.tar_angles) > 15:
+            print("can move toward target")
+            Rover.steer = determine_target_angle(Rover)
+            
+            if Rover.steer is 15 or -15:
+                spin(Rover)
+            else:
+                accelerate(Rover)
+        
+
         # else:
         #     print("moving toward target")
         #     accelerate(Rover)
