@@ -177,7 +177,7 @@ def decision_step(Rover):
         else:
             # turn right
             if len(Rover.tar_angles) > 5:
-                print("target angles: ", Rover.tar_angles)
+                # print("target angles: ", Rover.tar_angles)
                 Rover.mode = 'target_ret'
             else:
                 print("nothing in front, spining")
@@ -188,7 +188,7 @@ def decision_step(Rover):
     # in target_ret mode, the rover is getting a target
     elif Rover.mode == 'target_ret':
         print("target_ret ", end="")
-        print("dist to target = ", Rover.tar_dists, end=" ")
+        #print("dist to target = ", Rover.tar_dists, end=" ")
         coast(Rover)
         
         # check if near sample and collect
@@ -200,22 +200,22 @@ def decision_step(Rover):
                 Rover.send_pickup = True
     
         
-        if len(Rover.tar_angles) <= 8:
+        if len(Rover.tar_angles) <= 3:
             print("in target mode, but not enough targets, back to explore")
             Rover.mode = 'explore'
         
-        elif len(Rover.tar_angles) > 8:
+        elif len(Rover.tar_angles) > 3:
             print("can move toward target")
             Rover.steer = determine_target_angle(Rover)
-            if np.mean(Rover.tar_dists) <= 50:
-                coast(Rover)
-            else:
-                accelerate(Rover)
+
+            if np.mean(Rover.tar_dists) < 100:
+                if Rover.vel >= 1:
+                    decelerate(Rover)
+                if Rover.vel >= 0.5:
+                    coast(Rover)
+                else:
+                    accelerate(Rover)
             
-            # if Rover.steer >= 15 or Rover.steer <= -15:
-            #     spin(Rover)
-            # else:
-            #     accelerate(Rover)
         
 
         # else:
