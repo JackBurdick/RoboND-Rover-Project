@@ -50,7 +50,7 @@ def determine_nav_angle(Rover, bias=0):
 
     f_drive_angles = [x for x in far_navs if x not in close_obs]
     f_drive_angles = np.asarray(f_drive_angles)
-    print(f_drive_angles)
+    # print(f_drive_angles)
     f_drive_buckets = np.round(f_drive_angles * 180 / (7 * np.pi)) * 7
     f_drive_angles = f_drive_buckets[f_drive_buckets <= 15.0]
     f_drive_angles = f_drive_angles[f_drive_angles >= -15]
@@ -60,7 +60,7 @@ def determine_nav_angle(Rover, bias=0):
         nav_angle = -15
     else:
         angle_options = collections.Counter(f_drive_angles)
-        print(angle_options.most_common(1))
+        # print(angle_options.most_common(1))
         selected_angle = angle_options.most_common(1)[0][0]
 
         # adjust steer angle for velocity
@@ -98,7 +98,7 @@ def decision_step(Rover):
             print("near target, slowing down")
             stop(Rover)
             if Rover.vel < 0.2:
-                Rover.pick_up = True
+                Rover.send_pickup = True
 
         # first check if we have nav, terrain
         # 5 is a magic number
@@ -135,7 +135,7 @@ def decision_step(Rover):
                             Rover.throttle = 0
                             Rover.steer = -14
                             Rover.stuck_count = 0
-                            print("stuck count limit reached:", stuck_count)
+                            print("stuck count limit reached:", Rover.stuck_count)
                         else:
                             Rover.stuck_count += 1
                     
@@ -183,7 +183,7 @@ def decision_step(Rover):
             print("near target, slowing down")
             stop(Rover)
             if Rover.vel < 0.2:
-                Rover.pick_up = True
+                Rover.send_pickup = True
     
         
         if len(Rover.tar_angles) <= 8:
