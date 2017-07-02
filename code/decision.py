@@ -33,6 +33,19 @@ def stop(Rover):
     Rover.throttle = 0
     Rover.brake = Rover.brake_set
 
+def determine_spin_dir(Rover):
+    nav_ok = np.round(Rover.nav_angles * 180 / (2 * np.pi)) * 2
+    right_count = nav_ok[nav_ok < 0]
+    left_count = nav_ok[nav_ok > 0]
+    if len(right_count) >= len(left_count):
+        nav_angle = -15
+    elif len(left_count) > len(right_count):
+        nav_angle = 15
+    else:
+        # default to right
+        nav_angle = -15
+    return nav_angle
+
 def determine_nav_angle(Rover, bias=0):
 
     close_obs = []
@@ -44,35 +57,36 @@ def determine_nav_angle(Rover, bias=0):
     far_navs = []
     m = 0
     for n in Rover.nav_dists:
-        if n >= 20:
+        if n >= 10:
             far_navs.append(Rover.nav_angles[i])
 
 
     f_drive_angles = [x for x in far_navs if x not in close_obs]
     f_drive_angles = np.asarray(f_drive_angles)
     # print(f_drive_angles)
-    f_drive_buckets = np.round(f_drive_angles * 180 / (7 * np.pi)) * 7
+    f_drive_buckets = np.round(f_drive_angles * 180 / (5 * np.pi)) * 5
     f_drive_angles = f_drive_buckets[f_drive_buckets <= 15.0]
     f_drive_angles = f_drive_angles[f_drive_angles >= -15]
     
     # There may not be any options to move forward; if so, turn right
     if len(f_drive_angles) == 0:
-        nav_angle = -15
+        selected_angle = determine_spin_dir(Rover)
+
     else:
         angle_options = collections.Counter(f_drive_angles)
         # print(angle_options.most_common(1))
         selected_angle = angle_options.most_common(1)[0][0]
 
-        # adjust steer angle for velocity
-        if Rover.vel >= 0.9:
-            turn_factor = 0.8
-        elif Rover.vel >= 0.7:
-            turn_factor = 0.9
-        else:
-            turn_factor = 1
+    # adjust steer angle for velocity
+    if Rover.vel >= 0.9:
+        turn_factor = 0.8
+    elif Rover.vel >= 0.7:
+        turn_factor = 0.9
+    else:
+        turn_factor = 1
 
         # bias, used to add bias to steer towards a the left wall (if positive)
-        nav_angle = (turn_factor * selected_angle)+bias
+    nav_angle = (turn_factor * selected_angle)+bias
     
     return nav_angle
 
@@ -133,7 +147,7 @@ def decision_step(Rover):
                     if Rover.throttle > 0 and (Rover.vel <= 0.05 and Rover.vel >= -0.05):
                         if Rover.stuck_count == 60:
                             Rover.throttle = 0
-                            Rover.steer = -14
+                            Rover.steer = determine_spin_dir(Rover)
                             Rover.stuck_count = 0
                             print("stuck count limit reached:", Rover.stuck_count)
                         else:
@@ -157,7 +171,7 @@ def decision_step(Rover):
                         accelerate(Rover)
                 else:
                     print("nothing in front, spining")
-                    Rover.steer = -8
+                    Rover.steer = determine_spin_dir(Rover)
                     spin(Rover)
         # if we can see a target, go into target mode
         else:
@@ -167,7 +181,7 @@ def decision_step(Rover):
                 Rover.mode = 'target_ret'
             else:
                 print("nothing in front, spining")
-                Rover.steer = -8
+                Rover.steer = determine_spin_dir(Rover)
                 spin(Rover)
 
 
