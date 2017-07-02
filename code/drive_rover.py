@@ -59,6 +59,7 @@ class RoverState():
         self.mode = 'forward' # Current mode (can be forward or stop)
         self.throttle_set = 0.2 # Throttle setting when accelerating
         self.brake_set = 10 # Brake setting when braking
+        self.stuck_count = 0 #Stuck count
         # The stop_forward and go_forward fields below represent total count
         # of navigable terrain pixels.  This is a very crude form of knowing
         # when you can keep going and when you should stop.  Feel free to
@@ -108,6 +109,14 @@ def telemetry(sid, data):
                 send_pickup()
                 # Reset Rover flags
                 Rover.pick_up = False
+                # Jack - added
+                data["picking_up"] = False
+            else:
+                print(data["picking_up"])
+                print("set false")
+                data["picking_up"] = False
+                print(data["picking_up"])
+                
         # In case of invalid telemetry, send null commands
         else:
 
