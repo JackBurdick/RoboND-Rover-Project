@@ -2,9 +2,12 @@ import numpy as np
 import collections
 import time
 
+############################################### Aux functions
 
 def accelerate(Rover):
-    ''' TODO: information '''
+    ''' accelerate will increase the rovers speed.
+    If the rover is already at max velocity, the rover will only coast
+    '''
     Rover.brake = 0
     if Rover.vel < Rover.max_vel:
         # accelerate
@@ -13,33 +16,40 @@ def accelerate(Rover):
         # coast
         Rover.throttle = 0
 
+
 def decelerate(Rover):
-    ''' TODO: information '''
+    ''' declerate will slow down the rover. '''
     Rover.throttle = 0
     Rover.brake = Rover.brake_set
     Rover.steer = 0
 
+
 def coast(Rover):
-    ''' TODO: information '''
+    ''' coast will allow the rover to coast '''
     Rover.throttle = 0
     Rover.brake = 0
 
+
 def spin(Rover):
-    ''' TODO: information '''
+    ''' spin will slow the rover then allow the rover to spin'''
     Rover.throttle = 0
     if Rover.vel >= 0.2:
         Rover.brake = Rover.brake_set
     else:
         Rover.brake = 0
 
+
 def stop(Rover):
-    ''' TODO: information '''
+    ''' stop will cause the rover to stop in its current location '''
     Rover.steer = 0
     Rover.throttle = 0
     Rover.brake = Rover.brake_set
 
+
 def determine_spin_dir(Rover):
-    ''' TODO: information '''
+    ''' determine_spin_dir will determine if the rover should spin left or right
+    The rover will count the number of navigable pixels on both sides of the
+    rover and choose the direction towards the most pixels  '''
     nav_ok = np.round(Rover.nav_angles * 180 / (2 * np.pi)) * 2
     right_count = nav_ok[nav_ok < 0]
     left_count = nav_ok[nav_ok > 0]
@@ -52,8 +62,13 @@ def determine_spin_dir(Rover):
         nav_angle = -15
     return nav_angle
 
+
 def determine_nav_angle(Rover, bias=0):
-    ''' TODO: information '''
+    ''' determine_nav_angle will determine which direction the rover should
+    steer.  The nav angels that are drivable over a certain distance will be 
+    first found, then the angels that include obstacles will be subtracted from
+    all these angles.  A `turn_factor` is used to prevent the rover from
+    attempting a full turn at max speed. '''
 
     close_obs = []
     i = 0
@@ -80,7 +95,6 @@ def determine_nav_angle(Rover, bias=0):
 
     else:
         angle_options = collections.Counter(f_drive_angles)
-        # print(angle_options.most_common(1))
         selected_angle = angle_options.most_common(1)[0][0]
 
     # adjust steer angle for velocity
@@ -91,14 +105,15 @@ def determine_nav_angle(Rover, bias=0):
     else:
         turn_factor = 1
 
-        # bias, used to add bias to steer towards a the left wall (if positive)
+    # bias, used to add bias to steer towards a the left wall (if positive)
     nav_angle = (turn_factor * selected_angle)+bias
     
     return nav_angle
 
 
 def determine_target_angle(Rover):
-    ''' TODO: information '''
+    ''' determine_target_angle determines which direction the rover should steer
+    to acquire a rock '''
 
     degree_buckets = np.round(Rover.tar_angles * 180 / (5 * np.pi)) * 5
 
@@ -107,7 +122,8 @@ def determine_target_angle(Rover):
     return selected_angle
 
 
-# build a decision tree for determining throttle, brake and steer 
+############################################### Main DT
+# Build a decision tree for determining throttle, brake and steer 
 # commands based on the output of the perception_step() function
 def decision_step(Rover):
     # in explore mode, the rover is exploring the map
@@ -222,7 +238,7 @@ def decision_step(Rover):
                     accelerate(Rover)
 
 
-    # Here we can expand on states, for now we'll send the rover back to the
+    # Here we could expand on states. For now, we'll send the rover back to the
     # exploring state
     else:
         Rover.mode = 'explore'
