@@ -4,6 +4,7 @@ import time
 
 
 def accelerate(Rover):
+    ''' TODO: information '''
     Rover.brake = 0
     if Rover.vel < Rover.max_vel:
         # accelerate
@@ -13,15 +14,18 @@ def accelerate(Rover):
         Rover.throttle = 0
 
 def decelerate(Rover):
+    ''' TODO: information '''
     Rover.throttle = 0
     Rover.brake = Rover.brake_set
     Rover.steer = 0
 
 def coast(Rover):
+    ''' TODO: information '''
     Rover.throttle = 0
     Rover.brake = 0
 
 def spin(Rover):
+    ''' TODO: information '''
     Rover.throttle = 0
     if Rover.vel >= 0.2:
         Rover.brake = Rover.brake_set
@@ -29,11 +33,13 @@ def spin(Rover):
         Rover.brake = 0
 
 def stop(Rover):
+    ''' TODO: information '''
     Rover.steer = 0
     Rover.throttle = 0
     Rover.brake = Rover.brake_set
 
 def determine_spin_dir(Rover):
+    ''' TODO: information '''
     nav_ok = np.round(Rover.nav_angles * 180 / (2 * np.pi)) * 2
     right_count = nav_ok[nav_ok < 0]
     left_count = nav_ok[nav_ok > 0]
@@ -47,6 +53,7 @@ def determine_spin_dir(Rover):
     return nav_angle
 
 def determine_nav_angle(Rover, bias=0):
+    ''' TODO: information '''
 
     close_obs = []
     i = 0
@@ -91,6 +98,7 @@ def determine_nav_angle(Rover, bias=0):
 
 
 def determine_target_angle(Rover):
+    ''' TODO: information '''
 
     degree_buckets = np.round(Rover.tar_angles * 180 / (5 * np.pi)) * 5
 

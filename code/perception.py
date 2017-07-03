@@ -38,6 +38,7 @@ def color_thresh_gold(img, hsv_thresh_lower=(10, 150, 100), hsv_thresh_upper=(25
     mask = cv2.inRange(hsv, lower_gold, upper_gold)
 
     # convert to binary
+    # TODO: rewrite - https://stackoverflow.com/questions/41672268/convert-numpy-array-with-floats-to-binary-0-or-1-integers
     i = 0
     for col in mask:
         j = 0
