@@ -55,7 +55,7 @@ To Use;
 **Note: running the simulator with different resolution and graphics quality may produce different results!**
 
 
-TODO:
+### TODO:
 - Steering needs to be improved
     - Will occasionally run into walls/obstacles
         - Could be partially attributed to:
