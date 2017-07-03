@@ -42,7 +42,7 @@ To record data on your own;
 The last two cells in the notebook are for running the analysis on a folder of test images to create a map of the simulator environment and write the output to a video.  These cells should run as-is and save a video called `test_mapping.mp4` to the `output` folder.
 
 ## Navigating Autonomously
- -`drive_rover.py`
+- `drive_rover.py`
     - will navigate the environment in autonomous mode.  
     - This script calls functions from within;
         - `perception.py`
