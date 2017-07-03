@@ -9,8 +9,7 @@ This project is modeled after the [NASA sample return challenge](https://www.nas
 Download the simulator build appropriate for your operating system.  Here are the links for [Linux](https://s3-us-west-1.amazonaws.com/udacity-robotics/Rover+Unity+Sims/Linux_Roversim.zip), [Mac](	https://s3-us-west-1.amazonaws.com/udacity-robotics/Rover+Unity+Sims/Mac_Roversim.zip), or [Windows](https://s3-us-west-1.amazonaws.com/udacity-robotics/Rover+Unity+Sims/Windows_Roversim.zip).  
 
 You can test out the simulator by;
-- opening it
-- choosing "Training Mode".  
+- Opening and choosing "Training Mode".  
 - Use the mouse or keyboard to navigate around the environment
 
 ## Dependencies
@@ -55,4 +54,14 @@ To Use;
 
 **Note: running the simulator with different resolution and graphics quality may produce different results!**
 
+
+TODO:
+- Steering needs to be improved
+    - Will occasionally run into walls/obstacles
+        - Could be partially attributed to:
+            - Camera/graphics issues (when near an object sometimes it makes it seem like the object is invisible)
+- The rover does not record where it has already traveled:
+    - This could be improved so that it will favor new territory
+- Speed issues
+    - The rover will occasionally drive over a rock sample.
 
